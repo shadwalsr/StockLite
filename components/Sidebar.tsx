@@ -109,17 +109,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="sidebar-footer">
-        <span className="signed-in-label">Signed in as</span>{' '}
-        <strong>Jordan Ruiz</strong>
-        <Link
-          href="/login"
-          className="sidebar-link"
-          style={{ padding: '6px 0 0' }}
-        >
-          Switch user
-        </Link>
-      </div>
     </aside>
   )
 }

@@ -560,6 +560,21 @@ export default function StockForm({
         }
       `}</style>
 
+      {/* Helpful Workflow Banner */}
+      <aside className="workflow-aside" style={{ marginBottom: '22px' }}>
+        <div className="workflow-aside-icon">↕</div>
+        <h3>Keep counts current</h3>
+        <p>
+          Each item card below enables directly purchasing new stock into any warehouse facility, or recording stock-out picks and adjustments.
+        </p>
+        <div className="workflow-tip">
+          <strong>Tip</strong>
+          <span>
+            Select any destination warehouse on an item card to directly purchase replenishment stock. Stock out is automatically protected against negative inventory.
+          </span>
+        </div>
+      </aside>
+
       {/* Top Level Summary Metric Cards */}
       <div className="stock-dashboard-stats">
         <div className="stat-card normal">

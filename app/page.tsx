@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 import {
   IconInventory,
   IconStock,
@@ -41,6 +42,7 @@ export default function HomePage() {
         <span className="brand">StockLite</span>
         <div className="links">
           <Link href="/login">Sign in</Link>
+          <ThemeToggle standalone />
         </div>
         <Link href="/inventory" className="btn btn-primary">
           Open dashboard
