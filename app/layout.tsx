@@ -24,7 +24,22 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${plexSans.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${plexSans.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                let theme = localStorage.getItem('stocklite-theme');
+                if (!theme) {
+                  theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   )
