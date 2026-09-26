@@ -4,20 +4,50 @@ import { useEffect, useState } from 'react'
 
 export default function ThemeToggle({ standalone = false }: { standalone?: boolean }) {
   const [dark, setDark] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const saved = localStorage.getItem('stocklite-theme')
+    const currentDomTheme = document.documentElement.getAttribute('data-theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const isDark = saved ? saved === 'dark' : prefersDark
+    const isDark = saved ? saved === 'dark' : (currentDomTheme === 'dark' || prefersDark)
+
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+    document.documentElement.classList.toggle('dark', isDark)
     setDark(isDark)
+
+    const handleThemeChange = () => {
+      const current = document.documentElement.getAttribute('data-theme') === 'dark'
+      setDark(current)
+    }
+
+    window.addEventListener('stocklite-theme-change', handleThemeChange)
+    window.addEventListener('storage', handleThemeChange)
+    return () => {
+      window.removeEventListener('stocklite-theme-change', handleThemeChange)
+      window.removeEventListener('storage', handleThemeChange)
+    }
   }, [])
 
-  function toggleTheme() {
-    const nextDark = !dark
-    document.documentElement.dataset.theme = nextDark ? 'dark' : 'light'
-    localStorage.setItem('stocklite-theme', nextDark ? 'dark' : 'light')
+  function toggleTheme(e?: React.MouseEvent) {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    const currentTheme = document.documentElement.getAttribute('data-theme') || (dark ? 'dark' : 'light')
+    const nextDark = currentTheme !== 'dark'
+    const nextTheme = nextDark ? 'dark' : 'light'
+
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    document.documentElement.dataset.theme = nextTheme
+    document.documentElement.classList.toggle('dark', nextDark)
+    try {
+      localStorage.setItem('stocklite-theme', nextTheme)
+    } catch {}
     setDark(nextDark)
+    window.dispatchEvent(new CustomEvent('stocklite-theme-change', { detail: { theme: nextTheme } }))
   }
 
   return (

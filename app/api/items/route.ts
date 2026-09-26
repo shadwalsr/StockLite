@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
-import { applyStockMovement, applyTransfer, products } from '@/lib/seed-data'
+import {
+  applyStockMovement,
+  applyTransfer,
+  products,
+  warehouses,
+} from '@/lib/seed-data'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  return NextResponse.json({ products })
+  return NextResponse.json({ products, warehouses })
 }
 
 export async function POST(request: Request) {
@@ -18,11 +23,12 @@ export async function POST(request: Request) {
   const action = body.action
 
   try {
-    if (action === 'stock') {
-      const { productId, quantity, direction } = body as {
+    if (action === 'stock' || action === 'buy') {
+      const { productId, quantity, direction, warehouseId } = body as {
         productId: string
         quantity: number
-        direction: 'IN' | 'OUT'
+        direction?: 'IN' | 'OUT'
+        warehouseId?: string
       }
       if (!productId || typeof productId !== 'string') {
         return NextResponse.json(
@@ -30,7 +36,8 @@ export async function POST(request: Request) {
           { status: 400 },
         )
       }
-      if (direction !== 'IN' && direction !== 'OUT') {
+      const dir: 'IN' | 'OUT' = action === 'buy' ? 'IN' : (direction ?? 'IN')
+      if (dir !== 'IN' && dir !== 'OUT') {
         return NextResponse.json(
           { error: 'direction must be IN or OUT' },
           { status: 400 },
@@ -43,8 +50,8 @@ export async function POST(request: Request) {
           { status: 400 },
         )
       }
-      const product = applyStockMovement(productId, numQty, direction)
-      return NextResponse.json({ product, products })
+      const product = applyStockMovement(productId, numQty, dir, warehouseId)
+      return NextResponse.json({ product, products, warehouses })
     }
 
     if (action === 'transfer') {

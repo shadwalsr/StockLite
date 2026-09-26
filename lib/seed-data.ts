@@ -288,8 +288,9 @@ export function applyStockMovement(
   productId: string,
   quantity: number,
   direction: 'IN' | 'OUT',
+  targetWarehouseId?: string,
 ): Product {
-  const product = findProduct(productId)
+  let product = findProduct(productId)
   if (!product) throw new Error('Product not found')
 
   if (direction !== 'IN' && direction !== 'OUT') {
@@ -303,6 +304,47 @@ export function applyStockMovement(
     quantity <= 0
   ) {
     throw new Error('Quantity must be a positive number greater than 0')
+  }
+
+  // If a target warehouse is provided and differs from the current product's warehouse
+  if (targetWarehouseId && targetWarehouseId !== product.warehouseId) {
+    const warehouse = warehouses.find((w) => w.id === targetWarehouseId)
+    if (!warehouse) {
+      throw new Error(`Warehouse '${targetWarehouseId}' does not exist`)
+    }
+
+    let targetProd = products.find(
+      (p) =>
+        p.warehouseId === targetWarehouseId &&
+        p.name.toLowerCase() === product!.name.toLowerCase(),
+    )
+
+    if (!targetProd) {
+      if (direction === 'OUT') {
+        throw new Error(
+          `Insufficient stock: ${product.name} does not exist at ${warehouse.name}`,
+        )
+      }
+      let maxNum = 0
+      for (const p of products) {
+        const match = p.id.match(/^p-(\d+)$/)
+        if (match) {
+          const num = parseInt(match[1], 10)
+          if (num > maxNum) maxNum = num
+        }
+      }
+      targetProd = {
+        id: `p-${String(maxNum + 1).padStart(3, '0')}`,
+        name: product.name,
+        category: product.category,
+        warehouseId: targetWarehouseId,
+        currentStock: 0,
+        reorderThreshold: product.reorderThreshold,
+      }
+      products.push(targetProd)
+    }
+
+    product = targetProd
   }
 
   if (direction === 'OUT' && quantity > product.currentStock) {
