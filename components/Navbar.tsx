@@ -1,27 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useState } from 'react'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function Navbar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const [userName, setUserName] = useState('Staff User')
+  const { data: session } = useSession()
   const [accountOpen, setAccountOpen] = useState(false)
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('stocklite-user')
-    if (!savedUser) return
-
-    try {
-      const user = JSON.parse(savedUser) as { name?: string }
-      if (user.name) setUserName(user.name)
-    } catch {
-      localStorage.removeItem('stocklite-user')
-    }
-  }, [])
+  const userName = session?.user?.name ?? 'Staff User'
 
   const initials = userName
     .split(' ')
@@ -31,17 +21,16 @@ export default function Navbar() {
     .slice(0, 2)
     .toUpperCase()
 
-  function handleLogout() {
-    localStorage.removeItem('stocklite-user')
-    setUserName('Staff User')
-    setAccountOpen(false)
-    router.push('/inventory')
+  async function handleLogout() {
+    await signOut({ callbackUrl: '/', redirect: true })
   }
 
-  function handleSwitchAccount() {
+  async function handleSwitchAccount() {
     const returnTo = encodeURIComponent(pathname || '/inventory')
-    setAccountOpen(false)
-    router.push(`/login?returnTo=${returnTo}`)
+    await signOut({
+      callbackUrl: `/login?returnTo=${returnTo}`,
+      redirect: true,
+    })
   }
 
   return (
@@ -64,7 +53,6 @@ export default function Navbar() {
             >
               <span className="navbar-avatar">{initials}</span>
               <span className="navbar-user-name">{userName}</span>
-              <span className="account-chevron" aria-hidden="true">⌄</span>
             </button>
             {accountOpen && (
               <div className="account-modal" role="dialog" aria-label="Account options">

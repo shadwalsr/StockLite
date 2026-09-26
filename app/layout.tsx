@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Archivo, IBM_Plex_Sans } from 'next/font/google'
+import AuthProvider from '@/components/AuthProvider'
 import './globals.css'
 
 const archivo = Archivo({
@@ -25,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${archivo.variable} ${plexSans.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }

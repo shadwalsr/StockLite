@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { FormEvent, useEffect, useState } from 'react'
 import ThemeToggle from '@/components/ThemeToggle'
 
@@ -32,20 +33,18 @@ export default function LoginPage() {
     setSubmitting(true)
     setError('')
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staffId: cleanId, pin: pin.trim() }),
+      const result = await signIn('credentials', {
+        staffId: cleanId,
+        pin: pin.trim(),
+        redirect: false,
       })
-      const data = await response.json()
-      if (!response.ok) {
-        setError(data.error ?? 'Could not sign you in.')
+      if (!result || result.error) {
+        setError('Invalid staff ID or PIN.')
         return
       }
-      localStorage.setItem('stocklite-user', JSON.stringify(data.user))
-      router.push(returnTo)
+      router.push('/inventory')
     } catch {
-      setError('Could not reach the sign-in service. Please try again.')
+      setError('Could not reach the authentication service. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -94,7 +93,7 @@ export default function LoginPage() {
 
           <div className="form-error">{error}</div>
           <button type="submit" className="btn btn-primary login-submit" disabled={submitting}>
-            {submitting ? 'Checking credentials...' : 'Continue to dashboard'}
+            {submitting ? 'Checking credentials...' : 'Continue to inventory'}
           </button>
         </form>
         <p className="login-note">Demo credentials are stored in credentials.json.</p>
