@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { applyStockMovement, applyTransfer, products } from '@/lib/seed-data'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   return NextResponse.json({ products })
 }
@@ -22,13 +24,26 @@ export async function POST(request: Request) {
         quantity: number
         direction: 'IN' | 'OUT'
       }
+      if (!productId || typeof productId !== 'string') {
+        return NextResponse.json(
+          { error: 'Valid productId is required' },
+          { status: 400 },
+        )
+      }
       if (direction !== 'IN' && direction !== 'OUT') {
         return NextResponse.json(
           { error: 'direction must be IN or OUT' },
           { status: 400 },
         )
       }
-      const product = applyStockMovement(productId, Number(quantity), direction)
+      const numQty = Number(quantity)
+      if (!Number.isFinite(numQty) || Number.isNaN(numQty) || numQty <= 0) {
+        return NextResponse.json(
+          { error: 'Quantity must be a positive number greater than 0' },
+          { status: 400 },
+        )
+      }
+      const product = applyStockMovement(productId, numQty, direction)
       return NextResponse.json({ product, products })
     }
 
@@ -38,10 +53,29 @@ export async function POST(request: Request) {
         destWarehouseId: string
         quantity: number
       }
+      if (!productId || typeof productId !== 'string') {
+        return NextResponse.json(
+          { error: 'Valid productId is required' },
+          { status: 400 },
+        )
+      }
+      if (!destWarehouseId || typeof destWarehouseId !== 'string') {
+        return NextResponse.json(
+          { error: 'Valid destWarehouseId is required' },
+          { status: 400 },
+        )
+      }
+      const numQty = Number(quantity)
+      if (!Number.isFinite(numQty) || Number.isNaN(numQty) || numQty <= 0) {
+        return NextResponse.json(
+          { error: 'Quantity must be a positive number greater than 0' },
+          { status: 400 },
+        )
+      }
       const { source, destination } = applyTransfer(
         productId,
         destWarehouseId,
-        Number(quantity),
+        numQty,
       )
       return NextResponse.json({ source, destination, products })
     }

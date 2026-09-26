@@ -53,7 +53,28 @@ export default function TransferForm({
     setError('')
     setSuccess('')
 
+    if (!productId) {
+      setError('Please select a product.')
+      return
+    }
+
+    if (sourceWarehouseId === destWarehouseId) {
+      setError('Source and destination warehouses must be different.')
+      return
+    }
+
     const parsedQuantity = Number(quantity)
+    if (!quantity || !Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+      setError('Enter a quantity greater than 0.')
+      return
+    }
+
+    if (selectedProduct && parsedQuantity > selectedProduct.currentStock) {
+      setError(
+        `Only ${selectedProduct.currentStock} in stock — cannot transfer more than that.`,
+      )
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -73,7 +94,21 @@ export default function TransferForm({
         return
       }
 
-      // TODO: update `products` state with data.source and data.destination
+      if (data.products) {
+        setProducts(data.products)
+      } else {
+        setProducts((prev) => {
+          const next = prev.map((p) => {
+            if (p.id === data.source.id) return data.source
+            if (p.id === data.destination.id) return data.destination
+            return p
+          })
+          if (!next.some((p) => p.id === data.destination.id)) {
+            next.push(data.destination)
+          }
+          return next
+        })
+      }
 
       setSuccess(
         `Transferred ${parsedQuantity} unit${parsedQuantity === 1 ? '' : 's'} of ${data.source.name} to the destination warehouse.`,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Transaction } from '@/lib/types'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -11,20 +11,33 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 export default function TransactionTable({
-  transactions,
+  transactions: initialTransactions,
 }: {
   transactions: Transaction[]
 }) {
+  const [data, setData] = useState(initialTransactions)
+
+  useEffect(() => {
+    fetch('/api/transactions')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((resData) => {
+        if (resData?.transactions) {
+          setData(resData.transactions)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   const warehouseOptions = useMemo(
-    () => Array.from(new Set(transactions.map((t) => t.warehouseName))).sort(),
-    [transactions],
+    () => Array.from(new Set(data.map((t) => t.warehouseName))).sort(),
+    [data],
   )
 
   const [typeFilter, setTypeFilter] = useState('all')
   const [warehouseFilter, setWarehouseFilter] = useState('all')
 
   const visibleTransactions = useMemo(() => {
-    return transactions
+    return [...data]
       .filter((t) => typeFilter === 'all' || t.type === typeFilter)
       .filter(
         (t) => warehouseFilter === 'all' || t.warehouseName === warehouseFilter,
@@ -33,7 +46,7 @@ export default function TransactionTable({
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       )
-  }, [transactions, typeFilter, warehouseFilter])
+  }, [data, typeFilter, warehouseFilter])
 
   return (
     <>
@@ -87,7 +100,25 @@ export default function TransactionTable({
                 <tr key={t.id}>
                   <td>{t.productName}</td>
                   <td>{t.warehouseName}</td>
-                  <td>{TYPE_LABELS[t.type] ?? t.type}</td>
+                  <td>
+                    <span>{TYPE_LABELS[t.type] ?? t.type}</span>
+                    {t.linkedTransactionId && (
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          fontSize: '11px',
+                          marginLeft: '6px',
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: 'rgba(0, 0, 0, 0.06)',
+                          color: '#555',
+                        }}
+                        title={`Paired with transaction ${t.linkedTransactionId}`}
+                      >
+                        ⇄ {t.linkedTransactionId}
+                      </span>
+                    )}
+                  </td>
                   <td>{t.quantity}</td>
                   <td>{new Date(t.timestamp).toLocaleString()}</td>
                 </tr>

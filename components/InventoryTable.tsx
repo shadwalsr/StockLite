@@ -1,21 +1,35 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Product,
   Warehouse,
   getStockStatus,
   getStockStatusLabel,
 } from '@/lib/types'
+import { isLowStock } from '@/lib/inventory-store'
 import StatusBadge from '@/components/StatusBadge'
 
 export default function InventoryTable({
-  products,
+  products: initialProducts,
   warehouses,
 }: {
   products: Product[]
   warehouses: Warehouse[]
 }) {
+  const [products, setProducts] = useState(initialProducts)
+
+  useEffect(() => {
+    fetch('/api/items')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.products) {
+          setProducts(data.products)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   const categories = useMemo(
     () => Array.from(new Set(products.map((p) => p.category))).sort(),
     [products],
@@ -30,10 +44,25 @@ export default function InventoryTable({
     return products.filter((p) => {
       if (selectedCategory !== 'all' && p.category !== selectedCategory)
         return false
-      if (lowStockOnly && p.currentStock > p.reorderThreshold) return false
+      if (lowStockOnly && !isLowStock(p.currentStock, p.reorderThreshold))
+        return false
       return true
     })
   }, [products, selectedCategory, lowStockOnly])
+
+  const warehouseLowStockSummary = useMemo(() => {
+    return warehouses.map((w) => {
+      const warehouseProds = products.filter((p) => p.warehouseId === w.id)
+      const lowStockCount = warehouseProds.filter((p) =>
+        isLowStock(p.currentStock, p.reorderThreshold),
+      ).length
+      return {
+        ...w,
+        totalSkus: warehouseProds.length,
+        lowStockCount,
+      }
+    })
+  }, [products, warehouses])
 
   return (
     <>
@@ -55,6 +84,100 @@ export default function InventoryTable({
             {products.reduce((sum, p) => sum + p.currentStock, 0)}
           </div>
           <div className="label">Units on hand</div>
+        </div>
+      </div>
+
+      <div
+        className="panel"
+        style={{ padding: '16px 20px', marginBottom: '20px' }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '12px',
+            flexWrap: 'wrap',
+            gap: '8px',
+          }}
+        >
+          <div>
+            <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--ink)' }}>
+              Low Stock Replenishment Summary
+            </h3>
+            <p
+              style={{
+                margin: '2px 0 0',
+                fontSize: '12.5px',
+                color: 'var(--steel)',
+              }}
+            >
+              Products requiring replenishment (current stock ≤ reorder
+              threshold)
+            </p>
+          </div>
+        </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '12px',
+          }}
+        >
+          {warehouseLowStockSummary.map((w) => (
+            <div
+              key={w.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background:
+                  w.lowStockCount > 0
+                    ? 'rgba(139, 74, 63, 0.08)'
+                    : 'rgba(75, 99, 87, 0.08)',
+                border: `1px solid ${
+                  w.lowStockCount > 0
+                    ? 'rgba(139, 74, 63, 0.25)'
+                    : 'rgba(75, 99, 87, 0.25)'
+                }`,
+                borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              <div>
+                <strong style={{ fontSize: '13.5px', color: 'var(--ink)' }}>
+                  {w.name}
+                </strong>
+                <div style={{ fontSize: '12px', color: 'var(--steel)' }}>
+                  {w.location}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-display)',
+                    color:
+                      w.lowStockCount > 0
+                        ? 'var(--rust)'
+                        : 'var(--moss-dark)',
+                  }}
+                >
+                  {w.lowStockCount}
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--steel)',
+                    display: 'block',
+                  }}
+                >
+                  {w.lowStockCount === 1 ? 'item low' : 'items low'}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

@@ -55,6 +55,7 @@ export default function StockForm({
         return
       }
       setProducts((prev) =>
+        data.products ??
         prev.map((p) => (p.id === data.product.id ? data.product : p)),
       )
       setSuccess(
