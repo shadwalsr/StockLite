@@ -39,6 +39,8 @@ export default function TransferForm({
   }
 
   const selectedProduct = products.find((p) => p.id === productId)
+  const sourceWarehouse = warehouses.find((w) => w.id === sourceWarehouseId)
+  const destWarehouse = warehouses.find((w) => w.id === destWarehouseId)
 
   // TASK 3: This currently sends the transfer request with no validation at
   // all, and doesn't update the UI afterward. Add checks before calling the
@@ -122,7 +124,13 @@ export default function TransferForm({
   }
 
   return (
-    <div className="panel form-panel">
+    <div className="workflow-layout">
+      <div className="panel form-panel workflow-form-panel">
+        <div className="workflow-heading">
+          <span className="workflow-kicker">Movement desk</span>
+          <h2>Move inventory safely</h2>
+          <p>Choose a source, destination, and quantity. Both sides update together.</p>
+        </div>
       <form onSubmit={handleTransfer}>
         <div className="form-field">
           <label htmlFor="source">Source warehouse</label>
@@ -137,6 +145,12 @@ export default function TransferForm({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="transfer-route" aria-label="Transfer route">
+          <div><span>From</span><strong>{sourceWarehouse?.name ?? 'Select source'}</strong></div>
+          <span className="transfer-arrow" aria-hidden="true">→</span>
+          <div><span>To</span><strong>{destWarehouse?.name ?? 'Select destination'}</strong></div>
         </div>
 
         <div className="form-field">
@@ -186,7 +200,27 @@ export default function TransferForm({
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
           />
+          <div className="quick-quantities" aria-label="Quick quantity selection">
+            {[1, 10, 25, 50].map((amount) => (
+              <button key={amount} type="button" onClick={() => setQuantity(String(amount))}>
+                {amount}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {selectedProduct && (
+          <div className="selection-card transfer-selection">
+            <div>
+              <strong>{selectedProduct.name}</strong>
+              <span>{selectedProduct.category}</span>
+            </div>
+            <div className="selection-stock">
+              <strong>{selectedProduct.currentStock}</strong>
+              <span>available to move</span>
+            </div>
+          </div>
+        )}
 
         <div className="form-error">{error}</div>
         {!error && success && (
@@ -211,6 +245,13 @@ export default function TransferForm({
           </button>
         </div>
       </form>
+      </div>
+      <aside className="workflow-aside">
+        <div className="workflow-aside-icon">⇄</div>
+        <h3>Balanced transfers</h3>
+        <p>Transfers create a paired outgoing and incoming record so every move stays traceable.</p>
+        <div className="workflow-tip"><strong>Protected</strong><span>Source and destination must differ, and stock can never go negative.</span></div>
+      </aside>
     </div>
   )
 }

@@ -16,6 +16,12 @@ export default function StockForm({
   const [submitting, setSubmitting] = useState(false)
 
   const selectedProduct = products.find((p) => p.id === productId)
+  const stockPercent = selectedProduct
+    ? Math.min(
+        100,
+        Math.round((selectedProduct.currentStock / Math.max(selectedProduct.reorderThreshold * 2, 1)) * 100),
+      )
+    : 0
 
   async function submitMovement(direction: 'IN' | 'OUT') {
     setError('')
@@ -70,7 +76,13 @@ export default function StockForm({
   }
 
   return (
-    <div className="panel form-panel">
+    <div className="workflow-layout">
+      <div className="panel form-panel workflow-form-panel">
+        <div className="workflow-heading">
+          <span className="workflow-kicker">Movement desk</span>
+          <h2>Record stock movement</h2>
+          <p>Update inventory in one step and keep the audit trail accurate.</p>
+        </div>
       <form>
         <div className="form-field">
           <label htmlFor="product">Product</label>
@@ -87,6 +99,23 @@ export default function StockForm({
           </select>
         </div>
 
+        {selectedProduct && (
+          <div className="selection-card">
+            <div>
+              <strong>{selectedProduct.name}</strong>
+              <span>{selectedProduct.category} · {selectedProduct.warehouseId}</span>
+            </div>
+            <div className="selection-stock">
+              <strong>{selectedProduct.currentStock}</strong>
+              <span>units on hand</span>
+            </div>
+            <div className="stock-meter" aria-label={`${selectedProduct.currentStock} units on hand`}>
+              <span style={{ width: `${stockPercent}%` }} />
+            </div>
+            <small>Reorder point: {selectedProduct.reorderThreshold} units</small>
+          </div>
+        )}
+
         <div className="form-field">
           <label htmlFor="quantity">Quantity</label>
           <input
@@ -97,6 +126,13 @@ export default function StockForm({
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
           />
+          <div className="quick-quantities" aria-label="Quick quantity selection">
+            {[1, 10, 25, 50].map((amount) => (
+              <button key={amount} type="button" onClick={() => setQuantity(String(amount))}>
+                {amount}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="form-error">{error}</div>
@@ -131,6 +167,13 @@ export default function StockForm({
           </button>
         </div>
       </form>
+      </div>
+      <aside className="workflow-aside">
+        <div className="workflow-aside-icon">↕</div>
+        <h3>Keep counts current</h3>
+        <p>Use Stock in for receipts and Stock out for picks, damage, or adjustments.</p>
+        <div className="workflow-tip"><strong>Tip</strong><span>Stock out is blocked when the requested amount exceeds available inventory.</span></div>
+      </aside>
     </div>
   )
 }
