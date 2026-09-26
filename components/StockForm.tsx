@@ -293,273 +293,6 @@ export default function StockForm({
 
   return (
     <>
-      <style jsx>{`
-        .stock-dashboard-stats {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 14px;
-          margin-bottom: 22px;
-        }
-        .stat-card {
-          background: var(--white);
-          border: 1px solid var(--steel-light);
-          border-radius: var(--radius-sm);
-          padding: 14px 18px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .stat-card.alert {
-          border-left: 4px solid var(--rust);
-          background: rgba(139, 74, 63, 0.04);
-        }
-        .stat-card.normal {
-          border-left: 4px solid var(--moss);
-        }
-        .stat-card-title {
-          font-size: 12px;
-          color: var(--steel);
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          font-weight: 600;
-        }
-        .stat-card-value {
-          font-size: 24px;
-          font-weight: 700;
-          font-family: var(--font-display);
-          color: var(--ink);
-          margin-top: 2px;
-        }
-        .stock-filter-container {
-          background: var(--white);
-          border: 1px solid var(--steel-light);
-          border-radius: var(--radius-sm);
-          padding: 14px 16px;
-          margin-bottom: 24px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .filter-group {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          align-items: center;
-        }
-        .items-box-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-          gap: 18px;
-        }
-        .item-box {
-          background: var(--white);
-          border: 1px solid var(--steel-light);
-          border-radius: var(--radius-md);
-          display: flex;
-          flex-direction: column;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-          transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-          overflow: hidden;
-        }
-        .item-box:hover {
-          border-color: var(--moss);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-          transform: translateY(-2px);
-        }
-        .item-box-header {
-          padding: 16px 18px 12px;
-          border-bottom: 1px solid var(--paper-dim);
-          background: #fdfcf9;
-        }
-        .item-badges {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 8px;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-        .item-name {
-          font-size: 15px;
-          font-weight: 700;
-          color: var(--ink);
-          margin: 0 0 6px;
-          font-family: var(--font-display);
-          line-height: 1.3;
-        }
-        .item-location {
-          font-size: 12px;
-          color: var(--steel);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-        .item-stock-metrics {
-          padding: 12px 18px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background: var(--white);
-          border-bottom: 1px solid var(--paper-dim);
-        }
-        .metric-col {
-          display: flex;
-          flex-direction: column;
-        }
-        .metric-label {
-          font-size: 11px;
-          color: var(--steel);
-          text-transform: uppercase;
-          letter-spacing: 0.03em;
-        }
-        .metric-val {
-          font-size: 18px;
-          font-weight: 700;
-          font-family: var(--font-display);
-          color: var(--ink);
-        }
-        .item-action-area {
-          padding: 16px 18px;
-          background: #faf8f5;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        .mode-tabs {
-          display: flex;
-          background: var(--paper-dim);
-          padding: 3px;
-          border-radius: var(--radius-sm);
-          gap: 2px;
-        }
-        .mode-tab-btn {
-          flex: 1;
-          border: none;
-          background: transparent;
-          font-size: 12px;
-          font-weight: 600;
-          padding: 6px 10px;
-          border-radius: calc(var(--radius-sm) - 1px);
-          cursor: pointer;
-          color: var(--steel);
-          transition: all 0.15s ease;
-        }
-        .mode-tab-btn.active-buy {
-          background: var(--moss);
-          color: var(--white);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .mode-tab-btn.active-out {
-          background: var(--rust);
-          color: var(--white);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .form-row {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .form-row label {
-          font-size: 12px;
-          font-weight: 600;
-          color: var(--ink-soft);
-        }
-        .form-row select,
-        .form-row input {
-          width: 100%;
-          font-size: 13px;
-          padding: 7px 10px;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--steel-light);
-          background: var(--white);
-        }
-        .preset-chip-row {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          flex-wrap: wrap;
-          margin-top: 4px;
-        }
-        .preset-chip {
-          padding: 3px 8px;
-          font-size: 11px;
-          font-weight: 600;
-          background: var(--paper);
-          border: 1px solid var(--steel-light);
-          border-radius: var(--radius-sm);
-          color: var(--ink-soft);
-          cursor: pointer;
-          transition: all 0.12s ease;
-        }
-        .preset-chip:hover {
-          background: var(--paper-dim);
-          border-color: var(--moss);
-          color: var(--moss-dark);
-        }
-        .action-submit-btn {
-          width: 100%;
-          padding: 9px 14px;
-          font-size: 13px;
-          font-weight: 600;
-          border-radius: var(--radius-sm);
-          border: none;
-          cursor: pointer;
-          transition: background 0.15s ease, opacity 0.15s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-        }
-        .btn-buy {
-          background: var(--moss);
-          color: var(--white);
-        }
-        .btn-buy:hover:not(:disabled) {
-          background: var(--moss-dark);
-        }
-        .btn-stockout {
-          background: var(--rust);
-          color: var(--white);
-        }
-        .btn-stockout:hover:not(:disabled) {
-          background: #733c33;
-        }
-        .action-submit-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .feedback-banner {
-          font-size: 12px;
-          padding: 7px 10px;
-          border-radius: var(--radius-sm);
-          line-height: 1.35;
-          animation: feedbackFade 0.2s ease;
-        }
-        .feedback-banner.success {
-          background: rgba(75, 99, 87, 0.12);
-          color: var(--moss-dark);
-          border: 1px solid rgba(75, 99, 87, 0.3);
-        }
-        .feedback-banner.error {
-          background: rgba(139, 74, 63, 0.1);
-          color: var(--rust);
-          border: 1px solid rgba(139, 74, 63, 0.3);
-        }
-        @keyframes feedbackFade {
-          from {
-            opacity: 0;
-            transform: translateY(-4px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-
       {/* Helpful Workflow Banner */}
       <aside className="workflow-aside" style={{ marginBottom: '22px' }}>
         <div className="workflow-aside-icon">↕</div>
@@ -577,68 +310,58 @@ export default function StockForm({
 
       {/* Top Level Summary Metric Cards */}
       <div className="stock-dashboard-stats">
-        <div className="stat-card normal">
+        <div className="stock-stat-card normal">
           <div>
-            <div className="stat-card-title">Total Active SKUs</div>
-            <div className="stat-card-value">{summaryStats.totalItems}</div>
+            <div className="stock-stat-title">Total Active SKUs</div>
+            <div className="stock-stat-value">{summaryStats.totalItems}</div>
           </div>
-          <span style={{ fontSize: '24px' }}>📦</span>
+          <span className="stock-stat-icon">📦</span>
         </div>
 
-        <div className={`stat-card ${summaryStats.lowStockCount > 0 ? 'alert' : 'normal'}`}>
+        <div className={`stock-stat-card ${summaryStats.lowStockCount > 0 ? 'alert' : 'normal'}`}>
           <div>
-            <div className="stat-card-title">Items Needing Restock</div>
+            <div className="stock-stat-title">Items Needing Restock</div>
             <div
-              className="stat-card-value"
+              className="stock-stat-value"
               style={{ color: summaryStats.lowStockCount > 0 ? 'var(--rust)' : 'var(--moss-dark)' }}
             >
               {summaryStats.lowStockCount}
             </div>
           </div>
-          <span style={{ fontSize: '24px' }}>
+          <span className="stock-stat-icon">
             {summaryStats.lowStockCount > 0 ? '⚠️' : '✅'}
           </span>
         </div>
 
-        <div className="stat-card normal">
+        <div className="stock-stat-card normal">
           <div>
-            <div className="stat-card-title">Total Units On Hand</div>
-            <div className="stat-card-value">{summaryStats.totalUnits.toLocaleString()}</div>
+            <div className="stock-stat-title">Total Units On Hand</div>
+            <div className="stock-stat-value">{summaryStats.totalUnits.toLocaleString()}</div>
           </div>
-          <span style={{ fontSize: '24px' }}>🏢</span>
+          <span className="stock-stat-icon">🏢</span>
         </div>
       </div>
 
       {/* Search, Warehouse & Category Filter Bar */}
       <div className="stock-filter-container">
-        <div className="filter-group">
+        <div className="stock-filter-group">
           {/* Search box */}
-          <div style={{ position: 'relative' }}>
+          <div className="stock-search-wrap">
+            <span className="stock-search-icon">🔍</span>
             <input
               type="text"
               placeholder="Search product, SKU or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: '260px', paddingLeft: '28px' }}
+              className="stock-search-input"
             />
-            <span
-              style={{
-                position: 'absolute',
-                left: '9px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--steel)',
-                fontSize: '13px',
-              }}
-            >
-              🔍
-            </span>
           </div>
 
           {/* Warehouse filter */}
           <select
             value={selectedWarehouseFilter}
             onChange={(e) => setSelectedWarehouseFilter(e.target.value)}
+            className="stock-select"
             aria-label="Filter by warehouse"
           >
             <option value="all">All Warehouses</option>
@@ -653,6 +376,7 @@ export default function StockForm({
           <select
             value={selectedCategoryFilter}
             onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+            className="stock-select"
             aria-label="Filter by category"
           >
             <option value="all">All Categories</option>
@@ -664,16 +388,7 @@ export default function StockForm({
           </select>
 
           {/* Low stock only checkbox */}
-          <label
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '13px',
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
-          >
+          <label className="stock-checkbox-label">
             <input
               type="checkbox"
               checked={lowStockOnly}
@@ -684,11 +399,12 @@ export default function StockForm({
         </div>
 
         {/* Sort selector */}
-        <div className="filter-group">
+        <div className="stock-filter-group">
           <span style={{ fontSize: '12px', color: 'var(--steel)' }}>Sort:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'name' | 'stock-asc' | 'stock-desc')}
+            className="stock-select"
             aria-label="Sort items"
           >
             <option value="name">Product Name (A-Z)</option>
@@ -727,26 +443,21 @@ export default function StockForm({
             )
             const targetWarehouseStock = targetWarehouseProduct ? targetWarehouseProduct.currentStock : 0
 
+            const stockPercent = Math.min(
+              100,
+              Math.round((product.currentStock / Math.max(product.reorderThreshold * 2, 1)) * 100),
+            )
+
             return (
-              <div key={product.id} className="item-box">
+              <div
+                key={product.id}
+                className={`item-box ${isCriticalOrLow ? 'alert-border' : 'normal-border'}`}
+              >
                 {/* Box Header */}
                 <div className="item-box-header">
                   <div className="item-badges">
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        background: 'var(--paper-dim)',
-                        padding: '2px 7px',
-                        borderRadius: '3px',
-                        color: 'var(--steel)',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {product.category}
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--steel)', fontWeight: 500 }}>
-                      #{product.id}
-                    </span>
+                    <span className="item-category-chip">{product.category}</span>
+                    <span className="item-sku-tag">#{product.id}</span>
                     <StatusBadge status={status} label={getStockStatusLabel(status)} />
                   </div>
 
@@ -791,6 +502,18 @@ export default function StockForm({
                   </div>
                 </div>
 
+                {/* Visual Stock Meter Bar */}
+                <div style={{ padding: '0 18px 10px', background: 'var(--white)' }}>
+                  <div className="stock-meter" style={{ marginTop: '8px' }}>
+                    <span
+                      style={{
+                        width: `${stockPercent}%`,
+                        backgroundColor: isCriticalOrLow ? 'var(--rust)' : 'var(--moss)',
+                      }}
+                    />
+                  </div>
+                </div>
+
                 {/* Action Area: Buy / Stock In & Stock Out */}
                 <div className="item-action-area">
                   {/* Mode Selector Tabs */}
@@ -815,7 +538,7 @@ export default function StockForm({
                   {currentMode === 'BUY' ? (
                     <>
                       {/* Warehouse to Buy Into Option */}
-                      <div className="form-row">
+                      <div className="box-form-row">
                         <label htmlFor={`wh-select-${product.id}`}>
                           Select Warehouse to Buy into:
                         </label>
@@ -844,7 +567,7 @@ export default function StockForm({
                       </div>
 
                       {/* Quantity Input & Presets */}
-                      <div className="form-row">
+                      <div className="box-form-row">
                         <label htmlFor={`qty-buy-${product.id}`}>
                           Units to Buy:
                         </label>
@@ -934,7 +657,7 @@ export default function StockForm({
                   ) : (
                     /* STOCK OUT PANEL */
                     <>
-                      <div className="form-row">
+                      <div className="box-form-row">
                         <label htmlFor={`qty-out-${product.id}`}>
                           Units to Stock Out from {warehouseName(product.warehouseId)}:
                         </label>
