@@ -22,7 +22,10 @@
   --radius-md: 12px;
 }
 
-html[data-theme='dark'] {
+:root[data-theme='dark'],
+html[data-theme='dark'],
+[data-theme='dark'],
+html.dark {
   --ink: #eef5f1;
   --ink-soft: #c0d0c8;
   --paper: #101715;
@@ -46,6 +49,8 @@ html[data-theme='dark'] {
 }
 
 html {
+  background: var(--paper);
+  color: var(--ink);
   scroll-behavior: smooth;
 }
 

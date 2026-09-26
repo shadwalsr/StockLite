@@ -25,22 +25,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${archivo.variable} ${plexSans.variable}`} suppressHydrationWarning>
-      <head>
+      <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              try {
-                let theme = localStorage.getItem('stocklite-theme');
-                if (!theme) {
-                  theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
-                document.documentElement.setAttribute('data-theme', theme);
-              } catch (e) {}
+              (function() {
+                try {
+                  var saved = localStorage.getItem('stocklite-theme');
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var theme = saved || (prefersDark ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.documentElement.classList.toggle('dark', theme === 'dark');
+                } catch (e) {}
+              })();
             `,
           }}
         />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   )
 }
